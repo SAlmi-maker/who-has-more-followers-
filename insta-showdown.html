@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" href="favicon.png">
+<title>Who Has More Followers?</title>
+<style>
+:root{--bg:#fafafa;--card:#fff;--tx:#1a1a1a;--mut:#777;--bd:#e3e3e3;--ok:#1fa653;--no:#e0342f;--ac:#d6249f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121212;--card:#1e1e1e;--tx:#f2f2f2;--mut:#999;--bd:#333}}
+:root[data-theme="dark"]{--bg:#121212;--card:#1e1e1e;--tx:#f2f2f2;--mut:#999;--bd:#333}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+.wrap{max-width:820px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+h1{font-size:1.2rem;margin:0;background:linear-gradient(45deg,#feda75,#d62976,#4f5bd5);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sc{font-size:.9rem;color:var(--mut)}.sc b{color:var(--tx);font-size:1.1rem}
+.q{text-align:center;margin:10px 0 14px;font-weight:600}
+.cdwrap{display:flex;align-items:center;gap:10px;max-width:420px;margin:0 auto 14px}
+.cdbar{flex:1;height:7px;border-radius:99px;background:var(--bd);overflow:hidden}
+.cdfill{height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,#f09433,#dc2743,#bc1888);
+  transition:width .95s linear}
+.cdnum{font-size:.85rem;font-weight:800;color:var(--mut);min-width:2.6rem;text-align:right;font-variant-numeric:tabular-nums}
+.cdwrap.low .cdnum{color:var(--no)}
+.cdwrap.low .cdfill{background:var(--no)}
+.cdwrap.done .cdfill{opacity:.25}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:2px solid var(--bd);border-radius:18px;padding:22px 14px;text-align:center;cursor:pointer;transition:transform .15s,border-color .2s;font:inherit;color:inherit}
+.card:hover:not(:disabled){transform:translateY(-3px);border-color:var(--ac)}
+.card:disabled{cursor:default}
+.card.win{border-color:var(--ok)}.card.lose{border-color:var(--no)}
+.av{width:96px;height:96px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;font-size:2rem;font-weight:700;color:#fff;position:relative;overflow:hidden;
+box-shadow:0 0 0 4px var(--card),0 0 0 7px #d6249f}
+.av img{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center;display:block}
+
+.nm{font-size:1.15rem;font-weight:700}.hd{color:var(--mut);font-size:.9rem}.tg{display:inline-block;margin-top:6px;font-size:.75rem;padding:2px 10px;border-radius:99px;border:1px solid var(--bd);color:var(--mut)}
+.cnt{height:2.2rem;margin-top:10px;font-size:1.6rem;font-weight:800;visibility:hidden}
+.show .cnt{visibility:visible}
+.win .cnt{color:var(--ok)}.lose .cnt{color:var(--no)}
+.msg{text-align:center;margin:16px 0 8px;min-height:3.2rem}
+.msg .big{font-size:1.3rem;font-weight:800}
+.ic{width:1.05em;height:1.05em;vertical-align:-.15em;fill:currentColor;margin-right:.28em;flex:none}
+.btn{background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);color:#fff;border:0;border-radius:99px;padding:12px 28px;font-size:1rem;font-weight:700;cursor:pointer}
+.note{text-align:center;color:var(--mut);font-size:.75rem;margin-top:18px}
+.adbtn{display:inline-block;margin:16px auto 4px;padding:8px 16px;border-radius:99px;
+  border:1px solid var(--bd);background:var(--card);color:var(--mut);text-decoration:none;
+  font-size:.76rem;font-weight:600;transition:color .15s,border-color .15s}
+.adbtn:hover{color:var(--tx);border-color:var(--mut)}
+.adf{display:grid;gap:12px;margin-top:12px}
+.adf label{display:block;font-size:.72rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.adf input,.adf textarea{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:9px 10px}
+.adf textarea{min-height:64px;resize:vertical}
+.adrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.adrow{grid-template-columns:1fr}}
+.adprev{border:1px solid var(--bd);border-radius:12px;padding:12px;background:var(--bg);text-align:center}
+.adprev .lbl{font-size:.68rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.adprev .slot{display:flex;justify-content:center}
+.admsg{font-size:.76rem;line-height:1.5;padding:9px 11px;border-radius:10px;display:none}
+.admsg.ok{display:block;background:rgba(46,204,113,.12);color:#2ecc71}
+.admsg.err{display:block;background:rgba(231,76,60,.12);color:#e74c3c}
+.admsg.wait{display:block;background:rgba(241,196,15,.12);color:#f1c40f}
+.adfile{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.adfile img{max-height:88px;max-width:150px;border-radius:8px;border:1px solid var(--bd)}
+.adtiny{font-size:.7rem;color:var(--mut);margin-top:4px}
+.adtabs{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.adtab{font:inherit;font-size:.74rem;font-weight:600;cursor:pointer;padding:6px 12px;border-radius:99px;
+  border:1px solid var(--bd);background:var(--bg);color:var(--mut)}
+.adtab.on{background:var(--card);color:var(--tx);border-color:var(--mut)}
+.adpane input[type=url]{margin-top:2px}
+.sprow{display:none;justify-content:center;align-items:stretch;flex-wrap:nowrap;gap:10px;margin:22px 0 8px;width:100%}
+.sprow.on{display:flex}
+.sprow .sp{flex:1 1 0;min-width:0;max-width:33.333%;display:flex}
+.spbox{display:inline-flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;text-align:center;
+  max-width:100%;position:relative;padding:9px 12px;border-radius:12px;background:var(--card);
+  border:1px solid var(--bd);box-shadow:0 1px 2px rgba(0,0,0,.05),0 10px 26px -18px rgba(0,0,0,.45);
+  font-size:.8rem;font-weight:600;color:var(--mut);text-decoration:none}
+a.spbox{cursor:pointer}
+a.spbox:hover{box-shadow:0 2px 4px rgba(0,0,0,.06),0 14px 30px -16px rgba(0,0,0,.5)}
+a.spbox:hover .sptxt{color:var(--tx)}
+.sprow .spbox{width:100%;height:100%;align-self:stretch}
+.sprow .spbox.img{padding:6px}
+.sprow .sp:not(.has-img) .spbox{min-width:min(150px,26vw)}
+@media(max-width:560px){
+  .sprow{flex-wrap:wrap}
+  .sprow .sp{flex:1 1 46%;max-width:49%}
+}
+.spbox img{max-width:100%;width:auto;height:auto;max-height:120px;
+  display:block;border-radius:8px;object-fit:contain}
+.spbox .sptxt{color:var(--mut);max-width:100%;overflow-wrap:anywhere}
+.spbox .tag{position:absolute;top:-7px;right:8px;pointer-events:none;
+  font-size:.53rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--mut);background:var(--bg);border:1px solid var(--bd);border-radius:99px;padding:0 6px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:700;color:var(--mut);
+  background:var(--card);border:1px solid var(--bd);border-radius:99px;padding:5px 12px}
+.pill.on{color:var(--ok);border-color:var(--ok)}
+.pill.wait{color:#e8a33d;border-color:#e8a33d}
+.pill.err{color:var(--no);border-color:var(--no)}
+dialog{border:1px solid var(--bd);border-radius:16px;background:var(--card);color:var(--tx);padding:16px;max-width:min(560px,93vw)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog label{display:block;font-size:.72rem;font-weight:700;color:var(--mut);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.05em}
+dialog input{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:9px 10px}
+dialog button{font:inherit;cursor:pointer;border-radius:99px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);padding:8px 14px;font-weight:600}
+dialog button.pri{background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);color:#fff;border:0}
+.hint{font-size:.75rem;color:var(--mut);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Who has more followers?</h1>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+<div class="sc">Score <b id="s">0</b> &middot; Best <b id="b">0</b></div>
+    </div>
+</header>
+<div class="q">Tap the Instagram account you think has MORE followers</div>
+<div class="cdwrap" id="cdw"><div class="cdbar"><div class="cdfill" id="cdf"></div></div><div class="cdnum" id="cdn">10s</div></div>
+<div class="grid" id="g"></div>
+<div class="msg" id="m"></div>
+<div class="note">Follower counts are approximate and change daily.</div>
+<div class="sprow" id="sprow"></div>
+<div style="text-align:center"><button class="adbtn" id="adbtn" type="button">Rent an ad slot</button></div>
+</div>
+
+<dialog id="add">
+  <h2 style="font-size:1rem;margin:0 0 4px">Rent an ad slot</h2>
+  <div class="hint">Want to rent an ad slot? Get in touch directly.</div>
+  <div class="adf" style="gap:14px">
+    <div style="padding:16px;border:1px solid var(--bd);border-radius:12px;background:var(--bg);text-align:center">
+      <div style="font-size:.95rem;margin-bottom:10px">To rent an ad slot, email:</div>
+      <div style="font-size:1rem;font-weight:600;word-break:break-all"><a id="adMailLink" href="mailto:business@whohasmorefollowers.online">business@whohasmorefollowers.online</a></div>
+      <div class="adtiny" style="margin-top:8px">Just include your brand name, the slot you want, duration, banner image/link and the link for players.</div>
+    </div>
+    <div class="tools" style="justify-content:flex-end">
+      <button id="adClose" class="one">Close</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="fbd">
+<h2 style="font-size:1rem;margin:0 0 4px">Connect to Firebase</h2>
+<div class="hint">The manager page normally fills this in for you. If the game and manager are on different
+sites, paste the same Firebase web config here (Firebase console &rarr; Project settings &rarr; General &rarr; Your apps).</div>
+<label>apiKey</label><input id="f_apiKey" placeholder="AIza...">
+<label>authDomain</label><input id="f_authDomain" placeholder="my-app.firebaseapp.com">
+<label>databaseURL</label><input id="f_databaseURL" placeholder="https://my-app-default-rtdb.firebaseio.com">
+<label>projectId</label><input id="f_projectId" placeholder="my-app">
+<label>appId</label><input id="f_appId" placeholder="1:1234567890:web:abc123">
+<div class="hint" id="fbMsg">Not connected - playing the built-in list.</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<button class="pri" id="fbSave">Save &amp; connect</button>
+<button id="fbClose">Close</button>
+</div>
+</dialog>
+<script>
+const DEF=[
+["Cristiano Ronaldo","cristiano","Football",670,"#c0392b"],
+["Lionel Messi","leomessi","Football",510,"#2980b9"],
+["MrBeast","mrbeast","YouTuber",440,"#e63946"],
+["Selena Gomez","selenagomez","Singer / Actress",420,"#8e44ad"],
+["Dwayne Johnson","therock","Actor",395,"#16a085"],
+["Kylie Jenner","kyliejenner","Influencer",395,"#e84393"],
+["Ariana Grande","arianagrande","Singer",375,"#6c5ce7"],
+["T-Series","tseries","Music Label",370,"#b71c1c"],
+["Kim Kardashian","kimkardashian","Influencer",355,"#b8860b"],
+["Beyoncé","beyonce","Singer",310,"#d35400"],
+["Taylor Swift","taylorswift","Singer",280,"#2c3e50"],
+["Virat Kohli","virat.kohli","Cricket",270,"#1e6fd9"],
+["Neymar Jr","neymarjr","Football",220,"#27ae60"],
+["PewDiePie","pewdiepie","YouTuber",200,"#ff6b35"],
+["Elon Musk","elonmusk","Entrepreneur",195,"#455a64"],
+["Zendaya","zendaya","Actress",185,"#c2185b"],
+["Drake","drake","Rapper",170,"#111111"],
+["Cardi B","iamcardib","Rapper",160,"#7d3c98"],
+["Kylian Mbappé","k.mbappe","Football",120,"#0a3d91"],
+["Justin Bieber","justinbieber","Singer",105,"#c58f00"],
+["Billie Eilish","billieeilish","Singer",100,"#4a154b"],
+["The Weeknd","theweeknd","Singer",98,"#8e0e3c"],
+["MS Dhoni","msthoni","Cricket",95,"#ff6600"],
+["Shah Rukh Khan","iamsrk","Actor",92,"#c0392b"],
+["Priyanka Chopra","priyankachopra","Actor",85,"#8d5524"],
+["Rohit Sharma","rohitsharma","Cricket",85,"#1565c0"],
+["Bella Hadid","bellahadid","Model",85,"#d81b60"],
+["Shakira","shakira","Singer",85,"#f39c12"],
+["Gigi Hadid","gigihadid","Model",80,"#0277bd"],
+["Deepika Padukone","deepikapadukone","Actor",78,"#5d4037"],
+["Alia Bhatt","aliabhatt","Actor",72,"#ad1457"],
+["Leonardo DiCaprio","leonardodicaprio","Actor",72,"#1b5e20"],
+["Tom Holland","tomholland2013","Actor",70,"#c0392b"],
+["Mohamed Salah","mosalah","Football",70,"#e74c3c"],
+["Harry Styles","harrystyles","Singer",68,"#ad1457"],
+["Robert Downey Jr","robertdownneyjr","Actor",68,"#4e342e"],
+["Will Smith","willsmith","Actor",66,"#33691e"],
+["Brad Pitt","bradpitt","Actor",60,"#795548"],
+["Ed Sheeran","edsheeran","Singer",58,"#00796b"],
+["Katrina Kaif","katrinakaif","Actor",58,"#ef6c00"],
+["Ranveer Singh","ranveersingh","Actor",58,"#6a1b9a"],
+["Oprah Winfrey","oprah","TV Host",58,"#6d4c41"],
+["Nicki Minaj","nickiminaj","Rapper",58,"#f9a825"],
+["David Beckham","davidbeckham","Football",55,"#7b1fa2"],
+["LeBron James","lebronjames","Basketball",55,"#f57c00"],
+["Anushka Sharma","anushkasharma","Actor",55,"#880e4f"],
+["Bruno Mars","brunomars","Singer",55,"#c62828"],
+["Chris Hemsworth","chrishemsworth","Actor",53,"#1565c0"],
+["Hailey Bieber","haileybieber","Influencer",52,"#8e24aa"],
+["Adele","adele","Singer",52,"#283593"],
+["Vinícius Jr","vinijr","Football",50,"#f39c12"],
+["Varun Dhawan","varundhawan","Actor",50,"#00838f"],
+["Smriti Khanna","smritikhanna","Influencer",50,"#ec407a"],
+["Sachin Tendulkar","sachintendulkar","Cricket",48,"#0d47a1"],
+["Stephen Curry","stephcurry30","Basketball",45,"#1a237e"],
+["Zlatan Ibrahimović","ibrahimovic","Football",45,"#37474f"],
+["Hardik Pandya","hardikpandya","Cricket",45,"#0097a7"],
+["Kendall Jenner","kendalljenner","Influencer",44,"#6d4c41"],
+["Ryan Reynolds","ryanreynolds","Actor",44,"#5d4037"],
+["Doja Cat","dojacat","Rapper",42,"#c2185b"],
+["Kevin Durant","kevindurant","Basketball",40,"#1976d2"],
+["Luka Dončić","lukadoncic","Basketball",40,"#0277bd"],
+["Jackie Chan","jackiechan","Actor",40,"#c62828"],
+["Erling Haaland","erling","Football",40,"#2e86c1"],
+["Hrithik Roshan","hrithikroshan","Actor",40,"#4527a0"],
+["Ninja","ninja","Streamer",38,"#d32f2f"],
+["IShowSpeed","ishowspeed","Streamer",38,"#f4511e"],
+["Logan Paul","loganpaul","YouTuber",38,"#212121"],
+["Markiplier","markiplier","YouTuber",38,"#0288d1"],
+["Jake Paul","jakepaul","Boxer",38,"#6d4c41"],
+["J Balvin","jbalvin","Singer",38,"#fbc02d"],
+["Johnny Depp","johnnydepp","Actor",38,"#4e342e"],
+["Jason Statham","jasonstatham","Actor",38,"#263238"],
+["Achraf Hakimi","achrafhakimi","Football",33,"#117a65"],
+["Lamine Yamal","lamineyamal","Football",33,"#a93226"],
+["Miley Cyrus","mileycyrus","Singer",32,"#ad1457"],
+["Jude Bellingham","judebellingham","Football",30,"#1b5e20"],
+["Dua Lipa","dualipa","Singer",30,"#6a1b9a"],
+["Sergio Ramos","sergioramos","Football",28,"#c62828"],
+["Son Heung-min","sonheungmin","Football",28,"#f4511e"],
+["Jacksepticeye","jacksepticeye","YouTuber",28,"#ef6c00"],
+["Zayn Malik","zaynmalik","Singer",28,"#455a64"],
+["DJ Khaled","djkhaled","Rapper",28,"#c0ca33"],
+["AB de Villiers","abdevilliers","Cricket",25,"#2e7d32"],
+["Harry Kane","harrykane","Football",25,"#b71c1c"],
+["Antoine Griezmann","antoinegriezmann","Football",25,"#37474f"],
+["DanTDM","dantdm","YouTuber",24,"#e53935"],
+["Gal Gadot","galgadot","Actress",24,"#1565c0"],
+["Margot Robbie","margotrobbie","Actress",22,"#6a1b9a"],
+["Kevin De Bruyne","kevindebruyne","Football",22,"#00695c"],
+["Timothée Chalamet","timothéechalamet","Actor",20,"#283593"],
+["Karim Benzema","karimbenzema","Football",20,"#1b5e20"],
+["Marcus Rashford","marcusrashford","Football",20,"#c62828"],
+["Chris Gayle","chrisgayle","Cricket",18,"#f9a825"],
+["Sylvester Stallone","sylvesterstallone","Actor",18,"#37474f"],
+["Bad Bunny","badbunny","Singer",18,"#6a1b9a"],
+["Camila Cabello","camilacabello","Singer",18,"#d81b60"],
+["Charlie Puth","charlieputh","Singer",18,"#1565c0"],
+["Eminem","eminem","Rapper",18,"#212121"],
+["Snoop Dogg","snoopdogg","Rapper",18,"#2e7d32"],
+["Odell Beckham","obj","Athlete",18,"#6a1b9a"],
+["Tyson Fury","tysonfury","Boxer",18,"#c62828"],
+["Millie Bobby Brown","milliebobbybrown","Actress",18,"#ad1457"],
+["Cara Delevingne","caradelevingne","Model",18,"#455a64"],
+["Emily Ratajkowski","emrata","Model",18,"#880e4f"],
+["Bella Poarch","bellapoarch","Influencer",18,"#e91e63"],
+["Tiger Woods","tigerwoods","Golf",15,"#f57c00"],
+["Serena Williams","serenawilliams","Tennis",15,"#6a1b9a"],
+["Rafael Nadal","rafaelnadal","Tennis",15,"#c0ca33"],
+["Conor McGregor","thenmjcgg","Fighter",15,"#2e7d32"],
+["Robert Pattinson","robertpattinson","Actor",15,"#37474f"],
+["Bill Gates","billgates","Entrepreneur",15,"#0d47a1"],
+["Phil Foden","philfoden","Football",14,"#1565c0"],
+["Richarlison","richarlison","Football",14,"#f9a825"],
+["Chris Rock","chrisrock","Comedian",14,"#37474f"],
+["Ellen DeGeneres","ellendegeneres","TV Host",14,"#0277bd"],
+["A$AP Rocky","asaprocky","Rapper",14,"#212121"],
+["Pharrell Williams","pharrell","Singer",14,"#fbc02d"],
+["Demi Lovato","demilovato","Singer",14,"#ad1457"],
+["Tom Brady","tombrady","Football",12,"#b71c1c"],
+["Lewis Hamilton","lewishamilton","F1 Driver",12,"#0277bd"],
+["Ja Morant","jamorant","Athlete",12,"#37474f"],
+["Gordon Ramsay","gordonramsay","Chef",12,"#b71c1c"],
+["Novak Djokovic","djokovic","Tennis",10,"#c62828"],
+["Roger Federer","rogerfederer","Tennis",8,"#1b5e20"],
+["Naomi Osaka","naomiosaka","Tennis",8,"#ad1457"],
+["Florence Pugh","florencepugh","Actress",8,"#6a1b9a"],
+["Samuel L. Jackson","samuelljackson","Actor",8,"#263238"],
+["Patrick Mahomes","patrickmahomes","Football",8,"#c62828"],
+["Charles Leclerc","charles_leclerc","F1 Driver",6,"#d32f2f"],
+["Lando Norris","lando","F1 Driver",5,"#00acc1"],
+["Aaron Rodgers","aaronrodgers","Football",5,"#f57c00"],
+["Israel Adesanya","israeladesanya","Fighter",4,"#c0ca33"],
+["Manny Pacquiao","mannypacquiao","Boxer",4,"#1565c0"],
+["Mike Tyson","miketyson","Boxer",4,"#212121"],
+["Carlos Alcaraz","carlosalcaraz","Tennis",4,"#2e7d32"],
+["Max Verstappen","maxverstappen","F1 Driver",4,"#1565c0"],
+["Fernando Alonso","fernandoalonso","F1 Driver",4,"#d32f2f"],
+["Anya Taylor-Joy","anyataylorjoy","Actress",4,"#ad1457"],
+["Guy Fieri","guyfieri","Chef",4,"#ef6c00"],
+["Iga Swiatek","igaswiatek","Tennis",3,"#c2185b"]
+].map(r=>[r[0],r[1],r[2],Math.round(r[3]*1e6),r[4],r[5]||""]);
+function hubRows(){try{const r=localStorage.getItem("igdata_v2");if(!r)return null;const a=JSON.parse(r);
+  if(!Array.isArray(a)||a.length<2)return null;
+  return a.map(o=>[o.name,String(o.handle||"").replace(/^@/,""),o.cat||"Other",Math.round(+o.f||0),o.col||"#888",o.img||""])}catch(e){return null}}
+const hub=hubRows();
+let P=hub||DEF,SRC=hub?"local":"builtin",srcMsg="";
+const FBKEY="igfb_v1",
+  FBA="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
+  FBD="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js";
+const FBCFG={apiKey:"AIzaSyBglu9ipOPHo1Ke5Q8AoSPjjtA3AsmhfuY",
+  authDomain:"who-has-more-followers.firebaseapp.com",
+  databaseURL:"https://who-has-more-followers-default-rtdb.firebaseio.com",
+  projectId:"who-has-more-followers",
+  storageBucket:"who-has-more-followers.firebasestorage.app",
+  messagingSenderId:"411477609158",
+  appId:"1:411477609158:web:8a444c57c800a60ab1a5c7",
+  measurementId:"G-8X2MRK2V04"};
+function src(extra){
+  const e=$("src");if(!e)return;
+  if(SRC==="firebase")e.textContent="- live from Firebase ("+P.length+" accounts)"+(extra?" - "+extra:"");
+  else if(SRC==="local")e.textContent="- saved in this browser"+(extra?" - "+extra:"");
+  else e.textContent="- built-in list"+(extra?" - "+extra:"");
+}
+function pill(t,cls){
+  const p=$("fbPill"),s=$("src2"),m=$("fbMsg");
+  if(s)s.textContent=t;
+  if(p)p.className="pill"+(cls==="on"?" on":cls==="wait"?" wait":cls?" err":"");
+  if(m)m.textContent=t;
+}
+function fbCfg(){try{
+  const raw=localStorage.getItem(FBKEY);
+  if(raw){const c=JSON.parse(raw);if(c&&c.apiKey&&c.databaseURL)return c}
+  try{localStorage.setItem(FBKEY,JSON.stringify(FBCFG))}catch(e){}
+  return FBCFG;
+}catch(e){return FBCFG}}
+function fbLib(){
+  if(window.firebase&&window.firebase.database)return Promise.resolve(window.firebase);
+  if(!fbLib.p)fbLib.p=new Promise((ok,no)=>{
+    const a=document.createElement("script");a.src=FBA;
+    a.onload=()=>{const d=document.createElement("script");d.src=FBD;
+      d.onload=()=>ok(window.firebase);d.onerror=()=>no(new Error("Firebase library blocked"));
+      document.head.appendChild(d)};
+    a.onerror=()=>no(new Error("Firebase library blocked - check your internet"));
+    document.head.appendChild(a);
+  }).catch(e=>{fbLib.p=null;throw e});
+  return fbLib.p;
+}
+function fbRows(v){
+  const out=[];
+  for(const k in v){const x=v[k]||{};
+    if(x.n||x.name)out.push([x.n||x.name,String(x.h||x.handle||"").replace(/^@/,""),
+      x.c||x.cat||"Other",Math.round(+x.f||0),x.col||"#888",x.img||""])}
+  return out;
+}
+function fbApply(rows,how){
+  if(!rows||rows.length<2)return false;
+  const sig=JSON.stringify(rows);
+  if(sig===fbApply.sig)return true;
+  fbApply.sig=sig;
+  P=rows;SRC="firebase";last=-1;busy=false;
+  $("m").innerHTML="";
+  try{localStorage.setItem("igdata_v2",JSON.stringify(
+    rows.map(r=>({name:r[0],handle:r[1],cat:r[2],f:r[3],col:r[4],img:r[5]}))))}catch(e){}
+  pill("Firebase","on");src(how||"");render();
+  return true;
+}
+async function fbStart(){
+  const c=fbCfg();
+  if(!c){pill("built-in","");src();return}
+  pill("connecting","wait");src("connecting to Firebase");
+  try{
+    const f=await fbLib();
+    const app=firebase.apps&&firebase.apps.length?firebase.apps[0]:firebase.initializeApp(c);
+    const db=firebase.database(app),r=db.ref("influencers");
+    
+    r.once("value").then(s=>{
+      if(!fbApply(fbRows(s.val()),"loaded")){pill("empty","err");src("no accounts in Firebase yet")}
+    }).catch(()=>{});
+    r.on("value",
+      s=>{if(!fbApply(fbRows(s.val()),"updated "+new Date().toLocaleTimeString()))pill("empty","err")},
+      err=>{pill("error","err");src(err.message.slice(0,40))});
+    db.ref("sponsors").on("value",s=>spApply(s.val()),()=>{});
+    db.ref(".info/connected").on("value",s=>{
+      if(s.val()===true&&SRC!=="firebase")pill("connected","wait");
+    });
+    setInterval(()=>{r.once("value").then(s=>{fbApply(fbRows(s.val()),"checked "+new Date().toLocaleTimeString())}).catch(()=>{})},15000);
+  }catch(err){pill("offline","err");src("Firebase unavailable - using saved list")}
+}
+
+let sc=0,best=0,pair=[],busy=false,last=-1;
+const SECS=10;
+let cdT=null,cdLeft=SECS;
+function cdStop(){if(cdT){clearInterval(cdT);cdT=null}}
+function cdDraw(){
+  const w=$("cdw"),f=$("cdf"),n=$("cdn");
+  if(!w)return;
+  w.className="cdwrap"+(cdLeft<=2?" low":"")+(cdLeft<=0?" done":"");
+  f.style.width=Math.max(0,cdLeft/SECS*100)+"%";
+  n.innerHTML=cdLeft>0?cdLeft+"s":IC_CLOCK_FACE;
+}
+function cdStart(){
+  cdStop();cdLeft=SECS;cdDraw();
+  cdT=setInterval(function(){
+    cdLeft--;cdDraw();
+    if(cdLeft<=0){cdStop();cdTimeout()}
+  },1000);
+}
+function cdTimeout(){
+  if(busy||!pair.length)return;
+  busy=true;
+  const v=pair.map(i=>P[i][3]),w=v[0]>v[1]?0:1;
+  document.querySelectorAll(".card").forEach((c,j)=>{c.disabled=true;c.classList.add("show",j===w?"win":"lose")});
+  $("m").innerHTML=`<div class="big" style="color:var(--no)">${IC_TIME}Time's up!</div>
+    <div style="margin:6px 0">${P[pair[w]][0]} has more followers</div>
+    <div style="margin:8px 0">Final score: ${sc}</div>
+    <button class="btn" id="n">Play again</button>`;
+  sc=0;$("n").onclick=render;$("n").focus();
+  $("s").textContent=sc;$("b").textContent=best;
+}
+try{best=+localStorage.getItem("igbest")||0}catch(e){}
+const $=id=>document.getElementById(id);
+const on=(id,ev,fn)=>{const el=$(id);if(el)el[ev]=fn};
+const trunc=(v,d)=>{const s=v.toFixed(9);return +s.slice(0,s.indexOf(".")+1+d)};
+const fmt=n=>{n=Math.floor(+n||0);
+ if(n>=1e9){const b=n/1e9;return (b>=10?trunc(b,1):trunc(b,2))+"B"}
+ if(n>=1e6){const m=n/1e6;return (m>=100?trunc(m,0):m>=10?trunc(m,1):trunc(m,2))+"M"}
+ if(n>=1e3)return trunc(n/1e3,0)+"K";return String(n)};
+const ini=n=>n.split(" ").map(w=>w[0]).slice(0,2).join("");
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const SPK="igsponsors_v1";
+// Change your contact details here - that is the only line you need to edit.
+const AD_CONTACT_EMAIL="business@whohasmorefollowers.online";
+let SPON=hubSponsors();
+function hubSponsors(){try{const r=localStorage.getItem(SPK);return r?JSON.parse(r)||{}:{}}catch(e){return {}}}
+function spLink(u){
+  try{const x=new URL(String(u||"").trim());return /^https?:$/.test(x.protocol)?x.href:""}catch(e){return ""}
+}
+function spImgFail(el){
+  const box=el.closest(".spbox");
+  if(!box)return;
+  el.remove();
+  if(box.querySelector(".sptxt"))return;
+  const slot=box.parentNode;
+  slot.remove();
+  spTrim();
+}
+// drop any empty slot wrappers, then hide the whole row if nothing is left
+function spTrim(){
+  const row=$("sprow");if(!row)return;
+  row.querySelectorAll(".sp").forEach(w=>{if(!w.querySelector(".spbox"))w.remove()});
+  if(!row.querySelector(".spbox")){row.innerHTML="";row.classList.remove("on")}
+}
+function spSlots(s){
+  s=(s&&typeof s==="object")?s:{};
+  // old layout had a "top" slot above the cards and one "bottom" slot;
+  // keep that banner by carrying it into slot 3.
+  return [s["1"]||null,s["2"]||null,s["3"]||s.bottom||null];
+}
+function spRender(){
+  const row=$("sprow");if(!row)return;
+  const S=spSlots(SPON);
+  let html="";
+  S.forEach(s=>{
+    s=s||{};
+    const img=spLink(s.i),txt=esc(s.t||""),url=spLink(s.u);
+    if(!img&&!txt)return;
+    html+=`<div class="sp${img?" has-img":""}"><${url?"a":"div"} class="spbox${img?" img":""}"${url?` href="${esc(url)}" target="_blank" rel="noopener nofollow sponsored"`:""}>
+      ${img?`<img src="${img}" alt="" decoding="async" onerror="spImgFail(this)">`:""}
+      ${txt?`<span class="sptxt">${txt}</span>`:""}
+      <span class="tag">Ad</span>
+    </${url?"a":"div"}></div>`;
+  });
+  row.innerHTML=html;
+  row.classList.toggle("on",!!html);
+}
+// --- ad slot enquiry card ---
+// holds the live firebase handle once connected, so enquiries can be stored for the manager
+
+// preview: renders the pending ad exactly like the real slots do
+function adImgFail(el){
+  // a slow image can fail AFTER the visitor already fixed the link and the
+  // preview was rebuilt, so ignore anything no longer on screen
+  if(!el.isConnected)return;
+  const slot=$("adSlot");
+  const box=el.closest(".spbox");
+  if(!box||box.parentNode.parentNode!==slot)return;
+  if(AD_SRC==="url"&&el.getAttribute("src")!==spLink(AD_LAST_IMG))return;
+  el.remove();
+  // on the upload path a broken file just falls back to text, but a dead pasted
+  // link is a mistake the visitor must fix, so never hide it
+  if(AD_SRC==="file"){
+    if(!box.querySelector(".sptxt")){box.remove();adPreview()}
+    return;
+  }
+  slot.innerHTML="<span style='color:#e74c3c;font-size:.78rem'>That image link could not be loaded. Check it opens as an image on its own.</span>";
+  adMsg("That image link did not load. Try opening it in a new tab to check it works.","err");
+}
+function adReport(d){
+  const L=[];
+  L.push("AD SLOT REQUEST");
+  L.push("-----------------------------------");
+  L.push("Name / brand: "+(d.name||"(not given)"));
+  L.push("Email: "+(d.mail||"(not given)"));
+  if(d.phone)L.push("Phone / WhatsApp: "+d.phone);
+  L.push("Link: "+(d.url||"(not given)"));
+  L.push("Slot: "+d.slot+" of 3");
+  L.push("Duration: "+d.weeks);
+  if(d.src==="url"){
+    L.push("Banner image link: "+(d.imgUrl||"NOT PROVIDED"));
+    L.push("(download this image and add it to the site yourself)");
+  }else if(d.img){
+    L.push("Banner file: "+d.img.name+" ("+Math.round(d.img.size/1024)+" KB, attached separately)");
+  }else{
+    L.push("Banner file: NOT PROVIDED");
+  }
+  if(d.note){L.push("");L.push("Extra notes:");L.push(d.note);}
+  L.push("");
+  L.push("Sent from the ad slot card.");
+  return L.join("\n");
+}
+function adValidate(d){
+  if(!d.name)return "Please add your name or brand so I know who this is for.";
+  if(!d.mail&&!d.phone)return "Please add an email or a phone number so I can reply.";
+  if(d.mail&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.mail))return "That email doesn't look right. Please check it.";
+  if(d.url&&!spLink(d.url))return "Your link has to start with http:// or https://";
+  if(d.src==="url"){
+    if(!d.imgUrl)return "Please paste a link to your banner image.";
+    if(!spLink(d.imgUrl))return "That image link has to start with http:// or https://";
+  }else if(d.img&&d.img.size>4*1024*1024)return "That banner is over 4 MB. Please use a smaller file.";
+  return "";
+}
+
+$("adbtn").onclick=()=>{$("add").showModal()};
+$("adClose").onclick=()=>{$("add").close()};
+["adName","adUrl","adSlotCh","adWeeks","adImgUrl"].forEach(id=>{const el=$(id);el&&el.addEventListener("input",adPreview)});
+// banner source tabs
+
+on("adSend","click",async()=>{
+  const d=adData();
+  const bad=adValidate(d);
+  if(bad){adMsg(bad,"err");return}
+  const to=String(AD_CONTACT_EMAIL||"").trim();
+  const body=adReport(d);
+  $("adSend").disabled=true;$("adSend").textContent="Sending...";
+  adMsg("Sending your request...","wait");
+  let stored=false;
+  try{stored=await adSave(d,body)}catch(e){stored=false}
+  $("adSend").disabled=false;$("adSend").textContent="Send my request";
+  if(!stored){
+    adMsg("Could not reach the site right now, so your details are on your clipboard instead. Paste them into an email and try again shortly.","err");
+    try{navigator.clipboard.writeText(body);$("adCopy").textContent="Copied!"}catch(e){}
+    return;
+  }
+  const hint=d.src==="file"
+    ?" Request received. Attach your banner to the email when it opens."
+    :" Request received. Your banner link is saved.";
+  if(to&&!/example\.com$/i.test(to)){
+    location.href="mailto:"+to+"?subject="+encodeURIComponent("Ad slot request - "+d.name)+"&body="+encodeURIComponent(body);
+    adMsg("Sent. Opening your email app so you can add your banner."+hint,"ok");
+  }else{
+    adMsg("Sent. You will hear back at "+(d.mail||"the contact you gave")+" shortly.","ok");
+  }
+});
+on("adCopy","click",async()=>{
+  const d=adData(),bad=adValidate(d);
+  if(bad){adMsg(bad,"err");return}
+  try{
+    await navigator.clipboard.writeText(adReport(d));
+    $("adCopy").textContent="Copied!";
+    adMsg("Details copied to your clipboard.","ok");
+    setTimeout(()=>{$("adCopy").textContent="Copy details"},2500);
+  }catch(e){adMsg("Couldn't copy automatically. Select the text and copy it manually.","err")}
+  // also store it, so nothing is lost even if the clipboard fails
+  try{await adSave(d,adReport(d))}catch(e){}
+});
+function spApply(s){
+  SPON=(s&&typeof s==="object")?s:{};
+  try{localStorage.setItem(SPK,JSON.stringify(SPON))}catch(e){}
+  spRender();
+}
+const ico=p=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${p}</svg>`;
+const IC_OK=ico('<path d="M12 1.9a10.1 10.1 0 1 0 0 20.2 10.1 10.1 0 0 0 0-20.2m-.6 15.2a1 1 0 0 1-.7-.3l-3.9-3.9a1 1 0 1 1 1.4-1.4l3.2 3.2 6-6a1 1 0 0 1 1.4 1.4l-6.7 6.7a1 1 0 0 1-.7.3"/>');
+const IC_NO=ico('<path d="M12 1.9a10.1 10.1 0 1 0 0 20.2 10.1 10.1 0 0 0 0-20.2m3.7 12.4-1.5 1.5L12 13.4l-2.2 2.4-1.5-1.5 2.4-2.2-2.4-2.2 1.5-1.5 2.2 2.4 2.4-2.4 1.5 1.5-2.4 2.2z"/>');
+const IC_TIME=ico('<path d="M12 1.9a10.1 10.1 0 1 0 0 20.2 10.1 10.1 0 0 0 0-20.2m0 3.1a1 1 0 0 1 1 1v4.7l3.5 2.1a1 1 0 1 1-1 1.7l-4-2.4a1 1 0 0 1-.5-.9V6a1 1 0 0 1 1-1"/><path d="M5.3 3.4a1 1 0 0 1 1.4 0l1.6 1.6a1 1 0 1 1-1.4 1.4L5.3 4.8a1 1 0 0 1 0-1.4"/>');
+const IC_CLOCK_FACE=ico('<path d="M12 1.9a10.1 10.1 0 1 0 0 20.2 10.1 10.1 0 0 0 0-20.2m0 3.1a1 1 0 0 1 1 1v4.7l3.5 2.1a1 1 0 1 1-1 1.7l-4-2.4a1 1 0 0 1-.5-.9V6a1 1 0 0 1 1-1"/>');
+function pick(){
+  if(P.length<2)return;
+  let a,b,g=0;
+  do{a=Math.floor(Math.random()*P.length);b=Math.floor(Math.random()*P.length);g++}
+  while((a===b||!P[a][3]||!P[b][3]||Math.abs(P[a][3]-P[b][3])<Math.max(P[a][3],P[b][3])*0.04||a===last)&&g<80);
+  pair=[a,b];last=a;
+}
+const avatar=p=>{const i=ini(p[0]).replace(/'/g,"&#39;");
+  return p[5]?`<div class="av"><img src="${p[5]}" alt="" loading="lazy" onerror="this.parentNode.textContent='${i}'"></div>`
+    :`<div class="av" style="background:linear-gradient(135deg,${p[4]},#222)">${ini(p[0])}</div>`};
+function render(){
+  cdStop();busy=false;pick();$("m").innerHTML="";
+  if(!pair.length){
+    $("g").innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--mut);padding:30px 10px">No accounts yet. Add them in the manager page.</div>';
+    $("cdw").style.display="none";
+    $("s").textContent=sc;$("b").textContent=best;src();return;
+  }
+  $("cdw").style.display="flex";
+  $("g").innerHTML=pair.map((i,k)=>{const p=P[i];return `<button class="card" data-k="${k}">
+  ${avatar(p)}
+  <div class="nm">${p[0]}</div><div class="hd">@${p[1]}</div><span class="tg">${p[2]}</span>
+  <div class="cnt">${fmt(p[3])}</div></button>`}).join("");
+  document.querySelectorAll(".card").forEach(c=>c.onclick=()=>choose(+c.dataset.k));
+  $("s").textContent=sc;$("b").textContent=best;src();
+  cdStart();
+}
+function choose(k){
+  if(busy)return;busy=true;cdStop();
+  const v=pair.map(i=>P[i][3]),w=v[0]>v[1]?0:1,ok=k===w;
+  document.querySelectorAll(".card").forEach((c,j)=>{c.disabled=true;c.classList.add("show",j===w?"win":"lose")});
+  if(ok){sc++;if(sc>best){best=sc;try{localStorage.setItem("igbest",best)}catch(e){}}
+    $("m").innerHTML=`<div class="big" style="color:var(--ok)">${IC_OK}Correct!</div><div style="margin:8px 0"><button class="btn" id="n">Next</button></div>`;
+    $("n").onclick=render;$("n").focus();
+  }else{
+    $("m").innerHTML=`<div class="big" style="color:var(--no)">${IC_NO}Wrong! ${P[pair[w]][0]} has more.</div><div style="margin:8px 0">Final score: ${sc}</div><button class="btn" id="n">Play again</button>`;
+    sc=0;$("n").onclick=render;
+  }
+  $("s").textContent=sc;$("b").textContent=best;
+}
+addEventListener("storage",e=>{
+  if(e.key==="igdata_v2"||e.key===null){
+    if(SRC==="firebase")return;
+    const h=hubRows();if(h){P=h;SRC="local";last=-1;busy=false;$("m").innerHTML="";render()}
+  }
+});
+$("fbSetup")&&($("fbSetup").onclick=()=>{
+  const c=fbCfg()||{};
+  ["apiKey","authDomain","databaseURL","projectId","appId"].forEach(k=>{const el=$("f_"+k);if(el)el.value=c[k]||""});
+  pill(SRC==="firebase"?"Firebase":SRC==="local"?"local":"built-in",SRC==="firebase"?"on":"");
+  $("fbd").showModal();
+});
+$("fbSave").onclick=()=>{
+  const c={};
+  ["apiKey","authDomain","databaseURL","projectId","appId"].forEach(k=>{const el=$("f_"+k);if(el&&el.value.trim())c[k]=el.value.trim()});
+  if(!c.apiKey||!c.databaseURL){pill("apiKey + databaseURL needed","err");return}
+  try{localStorage.setItem(FBKEY,JSON.stringify(c))}catch(e){}
+  $("fbd").close();SRC="local";P=hubRows()||DEF;fbStart();
+};
+$("fbClose").onclick=()=>$("fbd").close();
+src();spRender();render();fbStart();
+globalThis.__fb={get P(){return P},get SRC(){return SRC},get SPON(){return SPON},fbRows,fbApply,fbCfg,fbLib,fbStart,pill,src,spApply,spRender};</script>
+</body>
+</html>
